@@ -46,7 +46,9 @@ C=======================================================================
      &                  PATHGE,ECONO, MODEL, ATLINE)  
 
 !     2023-01-26 chp removed unused variables in argument list:
-!       CROP
+!     CROP
+
+      use CER_csv_input
 
       IMPLICIT NONE
       EXTERNAL CLEAR, ERROR, IGNORE, VERIFY, WARNING
@@ -84,6 +86,7 @@ C=======================================================================
 C-----------------------------------------------------------------------
 C    Read Cultivar Specific Genetics/Cultivar Parameter File
 C-----------------------------------------------------------------------
+      if(.not.use_csv_cul())then ! begin use_csv check
       OPEN (LUNVAR,FILE = FILEGG,STATUS = 'OLD',IOSTAT=ERRNUM)
       IF (ERRNUM .NE. 0) CALL ERROR (ERRKEY,ERRNUM,FILEG,0)
       IF (NSENS .EQ. 1) THEN
@@ -155,6 +158,7 @@ C
 !     analysis tool in the DSSAT shell, it should be OK.
       READ (C360, 800, IOSTAT=ERRNUM) VARTY
       IF (ADJUSTL(VARTY) .NE. ADJUSTL(VARNO)) GO TO 2010
+      end if  ! end use_csv check
 
 !     ------------------------------------------------------------------
       SELECT CASE (MODEL(1:5))
@@ -224,9 +228,16 @@ C-LPM  Add CIAT cassava model
 !       READ (C360, 800,IOSTAT=ERRNUM) VARTY,VRNAME,ECONO,
 !     &            P1V,P1D,P5,G1,G2,G3,PHINT, PLAINTXT
 !       READ (C360,820,IOSTAT=ERRNUM) VARTY,VRNAME,ECONO, PLAINTXT
+        if(use_csv_cul())then
+              call read_csv_cul(varno, econo,
+     &          p1v, p1d, p5, g1, g2, g3, phint)
+              varty = varno
+              vrname = " "
+              PLAINTXT = " "
+        else
         READ (C360, 830,IOSTAT=ERRNUM) VARTY,VRNAME,ECONO,
      &            P1V,P1D,P5,G1,G2,G3,PHINT, PLAINTXT
-
+        end if
 !     APSIM-NWheat wheat  **
 !     Tef model based on APSIM-NWheat created by KEP **
 !     JG moved CUL parameters to ECO file 01/21/2020
@@ -404,6 +415,8 @@ C-GH &            P1,P2O,P2R,P5,G1,G2,PHINT,P3,P4
      &           P1,P2,P3,P4,P5,P6,G2,G3,PHINT
       END SELECT
 
+      if(.not.use_csv_cul())then ! begin use_csv check
+
       IF (ERRNUM .NE. 0) CALL ERROR (ERRKEY,ERRNUM,FILEG,LINVAR)
 !      IF (((ADJUSTL(VARTY) .NE. ADJUSTL(VARNO)) .AND. (NSENS .EQ. 0)) 
 !     &       .OR. ((I .LT. NLVAR) .AND. (NSENS .EQ. 1))) GO TO 2010
@@ -425,6 +438,10 @@ C-GH &            P1,P2O,P2R,P5,G1,G2,PHINT,P3,P4
       ENDDO
 
       CLOSE (LUNVAR)
+      else
+         atline = " "
+         atline(1:1) = "@"
+      end if
 
       RETURN
 

@@ -88,7 +88,7 @@ ENDIF(FCNAME STREQUAL "pgf90")
 ##########################################################################################
 
 # Define the executable name and OSDefinitions file
-SET(EXECUTABLE_NAME dscsm0${MAJOR}${MINOR})
+SET(EXECUTABLE_NAME dscsm0${MAJOR}${MINOR}_csv)
 configure_file(
     "${PROJECT_SOURCE_DIR}/Utilities/CSMVersion.for.in"
     "${PROJECT_SOURCE_DIR}/Utilities/CSMVersion.for"
@@ -133,6 +133,7 @@ set(
         "Utilities/CSDISEASE.for"
         "Utilities/CSREADS.for"
         "Utilities/CSUTS.for"
+	"Utilities/dssat_csm_cli_mod.f90"
         "CSM_Main/CSM.for"
         "CSM_Main/LAND.for"
         "InputModule/COMGEN.blk"
@@ -356,6 +357,7 @@ set(
         "Plant/CROPGRO/SDCOMP.for"
         "Plant/CROPGRO/SENES.for"
         "Plant/CROPGRO/VEGGR.for"
+	"Plant/CERES-Wheat_Barley/CER_csv_input.f90"
         "Plant/CERES-Wheat_Barley/CSCER.for"
         "Plant/CERES-Wheat_Barley/CSCERES_Interface.for"
         "Plant/CERES-Wheat_Barley/CER_First_Trans_m.for"

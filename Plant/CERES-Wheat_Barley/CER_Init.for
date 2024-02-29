@@ -17,6 +17,8 @@
 
         USE ModuleDefs
         USE CER_First_Trans_m
+        USE CER_csv_input
+
         IMPLICIT NONE
         EXTERNAL YR_DOY, GETLUN, Y4K_DOY, TVILENT, LTRIM, XREADC, 
      &    XREADT, SPREADRA, XREADI, XREADR, UCASE, XREADIA, XREADRA, 
@@ -403,6 +405,11 @@ C  FO - 05/07/2020 Add new Y4K subroutine call to convert YRDOY
             ENDIF
           !ENDIF
  
+           if(use_csv_cul())then
+              call read_csv_cul(varno, econo,
+     &              p1v, p1d, pd(5), g1cwt, g2kwt, g3, phints)
+           else
+
           IF (RNMODE.NE.'T') CALL FVCHECK(CUDIRFLE,GENFLCHK)
 
           CALL XREADC (FILEIO,TN,RN,SN,ON,CN,'ECO#',econo)
@@ -450,6 +457,7 @@ C  FO - 05/07/2020 Add new Y4K subroutine call to convert YRDOY
 !           NB. TBAM is only used experimentally;should not be in coeff.files
           
           CALL XREADT (FILEIO,TN,RN,SN,ON,CN,'ADIR',fileadir)
+          end if
 
         ELSE
 
@@ -533,7 +541,7 @@ C  FO - 05/07/2020 Add new Y4K subroutine call to convert YRDOY
         IF (FILEIOT .NE. 'DS4') THEN
           !IF (CUDIRFLE.NE.CUDIRFLP .OR. VARNO.NE.VARNOP) THEN
            IF (RNMODE.NE.'T') CALL FVCHECK(CUDIRFLE,GENFLCHK)
-!            WRITE (fnumwrk,*) ' '
+!     WRITE (fnumwrk,*) ' '
             CALL CUREADC (CUDIRFLE,VARNO,'ECO#',econo)
             CALL CUREADR (CUDIRFLE,VARNO,'P1V',p1v)
             CALL CUREADR (CUDIRFLE,VARNO,'P1D',p1d)
@@ -588,6 +596,17 @@ C  FO - 05/07/2020 Add new Y4K subroutine call to convert YRDOY
           !ENDIF
         ENDIF
 
+        if(use_csv_eco())then
+           call read_csv_eco(
+     &      econo, pd(1), pd2fr(1), pd(2), pd(3), pd4fr(1), pd4fr(2),
+     &      pd(4), veff,
+     &      paruv, parur, phintl(2), phintf(3), lapot(1), lafv, lafr,
+     &      laws,
+     &      lsens, lsene, ti1lf, tilpe, tifac, tilds, tilde,
+     &      tildf, rdgs1, canhts, awns, kcan, rspcs, grns, grnmn, lt50h)
+        LLIFE = -99
+        else
+
         IF (RNMODE.NE.'T') CALL FVCHECK(ECDIRFLE,GENFLCHK)
         IF (PD(1).LE.0.0) CALL ECREADR (ECDIRFLE,ECONO,'P1',PD(1))
         IF (PD2FR(1).LE.0)CALL ECREADR (ECDIRFLE,ECONO,'P2FR1',PD2FR(1))
@@ -636,6 +655,8 @@ C  FO - 05/07/2020 Add new Y4K subroutine call to convert YRDOY
         CALL ECREADR (ECDIRFLE,ECONO,'LSPHE',lsene)
         CALL ECREADR (ECDIRFLE,ECONO,'PHF3',phintf(3))
         CALL ECREADR (ECDIRFLE,ECONO,'PHL2',phintl(2))
+
+        end if
 
         CALL FVCHECK(SPDIRFLE,GENFLCHK)
         IF (PD4FR(1).LE.0.0) CALL SPREADR (SPDIRFLE,'P4FR1',PD4FR(1))
